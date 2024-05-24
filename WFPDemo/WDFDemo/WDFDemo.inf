@@ -1,0 +1,77 @@
+;
+; WDFDemo.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=System ; TODO: specify appropriate Class
+ClassGuid={4d36e97d-e325-11ce-bfc1-08002be10318} ; TODO: specify appropriate ClassGuid
+Provider=%ManufacturerName%
+CatalogFile=WDFDemo.cat
+DriverVer= ; TODO: set DriverVer in stampinf property pages
+PnpLockdown=1
+
+[DestinationDirs]
+DefaultDestDir = 12
+WDFDemo_Device_CoInstaller_CopyFiles = 11
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+WDFDemo.sys  = 1,,
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+%WDFDemo.DeviceDesc%=WDFDemo_Device, Root\WDFDemo ; TODO: edit hw-id
+
+[WDFDemo_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+WDFDemo.sys
+
+;-------------- Service installation
+[WDFDemo_Device.NT.Services]
+AddService = WDFDemo,%SPSVCINST_ASSOCSERVICE%, WDFDemo_Service_Inst
+
+; -------------- WDFDemo driver install sections
+[WDFDemo_Service_Inst]
+DisplayName    = %WDFDemo.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\WDFDemo.sys
+
+;
+;--- WDFDemo_Device Coinstaller installation ------
+;
+
+[WDFDemo_Device.NT.CoInstallers]
+AddReg=WDFDemo_Device_CoInstaller_AddReg
+CopyFiles=WDFDemo_Device_CoInstaller_CopyFiles
+
+[WDFDemo_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[WDFDemo_Device_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
+[WDFDemo_Device.NT.Wdf]
+KmdfService =  WDFDemo, WDFDemo_wdfsect
+[WDFDemo_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="<Your manufacturer name>" ;TODO: Replace with your manufacturer name
+DiskName = "WDFDemo Installation Disk"
+WDFDemo.DeviceDesc = "WDFDemo Device"
+WDFDemo.SVCDESC = "WDFDemo Service"

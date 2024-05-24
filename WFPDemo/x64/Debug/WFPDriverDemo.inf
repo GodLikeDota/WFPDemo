@@ -1,0 +1,80 @@
+;
+; WFPDriverDemo.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=System ; TODO: specify appropriate Class
+ClassGuid={4d36e97d-e325-11ce-bfc1-08002be10318} ; TODO: specify appropriate ClassGuid
+Provider=%ManufacturerName%
+CatalogFile=WFPDriverDemo.cat
+DriverVer = 05/24/2024,21.57.58.361
+PnpLockdown=1
+
+[DestinationDirs]
+DefaultDestDir = 12
+WFPDriverDemo_Device_CoInstaller_CopyFiles = 11
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+WFPDriverDemo.sys  = 1,,
+;
+
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NTamd64
+
+[Standard.NTamd64]
+%WFPDriverDemo.DeviceDesc%=WFPDriverDemo_Device, Root\WFPDriverDemo ; TODO: edit hw-id
+
+[WFPDriverDemo_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+WFPDriverDemo.sys
+
+;-------------- Service installation
+[WFPDriverDemo_Device.NT.Services]
+AddService = WFPDriverDemo,%SPSVCINST_ASSOCSERVICE%, WFPDriverDemo_Service_Inst
+
+; -------------- WFPDriverDemo driver install sections
+[WFPDriverDemo_Service_Inst]
+DisplayName    = %WFPDriverDemo.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\WFPDriverDemo.sys
+
+;
+;--- WFPDriverDemo_Device Coinstaller installation ------
+;
+
+[WFPDriverDemo_Device.NT.CoInstallers]
+AddReg=WFPDriverDemo_Device_CoInstaller_AddReg
+CopyFiles=WFPDriverDemo_Device_CoInstaller_CopyFiles
+
+[WFPDriverDemo_Device_CoInstaller_AddReg]
+;
+
+
+[WFPDriverDemo_Device_CoInstaller_CopyFiles]
+;
+
+
+[WFPDriverDemo_Device.NT.Wdf]
+KmdfService =  WFPDriverDemo, WFPDriverDemo_wdfsect
+[WFPDriverDemo_wdfsect]
+KmdfLibraryVersion = 1.15
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="<Your manufacturer name>" ;TODO: Replace with your manufacturer name
+DiskName = "WFPDriverDemo Installation Disk"
+WFPDriverDemo.DeviceDesc = "WFPDriverDemo Device"
+WFPDriverDemo.SVCDESC = "WFPDriverDemo Service"
